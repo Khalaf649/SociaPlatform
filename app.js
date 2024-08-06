@@ -1,9 +1,15 @@
+require('dotenv').config();
+const helmet=require('helmet');
+const fs=require('fs');
+const morgan=require('morgan');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const path = require('path');
-const mongoURI = "mongodb+srv://Khalaf:AJkKAnjKCppNZofj@cluster0.espszhq.mongodb.net/SocialPlatform?retryWrites=true&w=majority&appName=Cluster0";
+const mongoURI = process.env.MONGODB_URI;
+const PORT=process.env.PORT;
+
 const postRouter = require('./Routes/posts');
 const authRouter = require('./Routes/auth');
 const multer = require('multer');
@@ -15,7 +21,7 @@ const server = http.createServer(app); // Create HTTP server with Express
 
 const diskStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, 'images'));
+        cb(null, 'images');
     },
     filename: (req, file, cb) => {
         cb(null, Date.now() + '-' + file.originalname);
@@ -32,9 +38,14 @@ const fileFilter = (req, file, cb) => {
         cb(null, false);
     }
 };
-
+const fileStream=fs.createWriteStream(path.join(__dirname,'acsess.log'),{flags:'a'})
 // Handle Cross-Origin Resource Sharing (CORS)
+app.use(helmet());
 app.use(cors());
+app.use(morgan('combined',{
+    stream:fileStream
+}))
+
 app.use(bodyParser.json());
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
@@ -66,8 +77,8 @@ mongoose.connect(mongoURI)
             });
         });
 
-        server.listen(8080, () => {
-            console.log("Server is running on port 8080");
+        server.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
         });
     })
     .catch(err => {

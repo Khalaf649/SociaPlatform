@@ -2,7 +2,7 @@ const { validationResult } = require('express-validator');
 const bcrypt = require('bcrypt');
 const jwt=require('jsonwebtoken');
 const User = require('../model/user');
-const SECURE_KEY="SECRET PASSWORD";
+const SECURE_KEY=process.env.SECURE_KEY
 exports.postSignup = async (req, res, next) => {
     try {
         const { email, name, password } = req.body;
